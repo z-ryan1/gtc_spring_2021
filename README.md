@@ -1,2 +1,2 @@
-# gtc_spring_2021
+# GTC Spring 2021
 GPU Acceleration in Python Using Elementwise Kernels 
