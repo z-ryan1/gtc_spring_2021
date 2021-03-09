@@ -22,7 +22,6 @@ _gauss_spline_kernel = cp.ElementwiseKernel(
                const double r_signsq { 0.5 / signsq };",
 )
 
-
 def gauss_spline(x, n):
     """Gaussian approximation to B-spline basis function of order n.
     Parameters
@@ -37,6 +36,21 @@ def gauss_spline(x, n):
        Methods in Computer Vision. SSVM 2007. Lecture Notes in Computer
        Science, vol 4485. Springer, Berlin, Heidelberg
     """
+    # if (pgram.dtype == 'float32'):
+    #     c_type = "float"
+    # elif (pgram.dtype == 'float64'):
+    #     c_type = "double"
+
     x = cp.asarray(x)
 
     return _gauss_spline_kernel(x, n)
+
+x = [ 2 ** 16 ]
+
+in_samps = 2 ** 10
+out_samps = 2 ** 20
+
+np.random.seed(1234)
+n = np.random.randint(0, 1234)
+x = np.linspace(0.01, 10 * np.pi, in_samps)
+print(gauss_spline(x, n ))

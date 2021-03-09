@@ -10,7 +10,13 @@ from string import Template
 # CuPy: Version 1
 # Raw kernel implementation of CuPy
 
+# _gauss_spline_src = Template("""extern "C" {
+#     __global__ void _gauss_spline_src(
 
+#     )
+# }
+# """
+# )
 _gauss_spline_kernel = cp.ElementwiseKernel(
     "T x, int32 n",
     "T output",
@@ -19,7 +25,7 @@ _gauss_spline_kernel = cp.ElementwiseKernel(
     """,
     "_gauss_spline_kernel",
     options=("-std=c++11",),
-    loop_prep="const double signsq { ( n + 1 ) / 12.0 }; \
+    loop_prep="const double signsq { ( n + 1 ) / 12.0 };\
                const double r_signsq { 0.5 / signsq };",
 )
 
