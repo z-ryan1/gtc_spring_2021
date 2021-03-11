@@ -11,7 +11,7 @@ from string import Template
 # Elementwise kernel implementation of CuPy
 
 _gauss_spline_kernel = cp.ElementwiseKernel(
-    "T x, int32 n",
+    "T x, int64 n",
     "T output",
     """
     output = 1 / sqrt( 2.0 * M_PI * signsq ) * exp( -( x * x ) * r_signsq );
@@ -23,34 +23,41 @@ _gauss_spline_kernel = cp.ElementwiseKernel(
 )
 
 def gauss_spline(x, n):
-    """Gaussian approximation to B-spline basis function of order n.
-    Parameters
-    ----------
-    n : int
-        The order of the spline. Must be nonnegative, i.e. n >= 0
-    References
-    ----------
-    .. [1] Bouma H., Vilanova A., Bescos J.O., ter Haar Romeny B.M., Gerritsen
-       F.A. (2007) Fast and Accurate Gaussian Derivatives Based on B-Splines.
-       In: Sgallari F., Murli A., Paragios N. (eds) Scale Space and Variational
-       Methods in Computer Vision. SSVM 2007. Lecture Notes in Computer
-       Science, vol 4485. Springer, Berlin, Heidelberg
-    """
-    # if (pgram.dtype == 'float32'):
-    #     c_type = "float"
-    # elif (pgram.dtype == 'float64'):
-    #     c_type = "double"
-
     x = cp.asarray(x)
 
     return _gauss_spline_kernel(x, n)
 
-x = [ 2 ** 16 ]
+if __name__ == "__main__":
 
-in_samps = 2 ** 10
-out_samps = 2 ** 20
+    loops = int(sys.argv[1])
 
-np.random.seed(1234)
-n = np.random.randint(0, 1234)
-x = np.linspace(0.01, 10 * np.pi, in_samps)
-print(gauss_spline(x, n ))
+    x = [ 2 ** 16 ]
+
+    in_samps = 2 ** 10
+    out_samps = 2 ** 20
+
+    np.random.seed(1234)
+    n = np.random.randint(0, 1234)
+    x = np.linspace(0.01, 10 * np.pi, in_samps)
+
+    d_x = cp.array(x)
+    d_n = cp.array(n)
+
+    # Run baseline with scipy.signal.lombscargle
+    with prof.time_range("scipy_gauss_spline", 0):
+        cpu_gauss_spline = signal.gauss_spline(x, n)
+
+    # Run Numba version
+    with prof.time_range("cupy_gauss_spline", 1):
+        gpu_gauss_spline = gauss_spline(d_x, d_n)
+
+    # Copy result to host
+    gpu_gauss_spline = cp.asnumpy(gpu_gauss_spline)
+
+    # Compare results
+    np.testing.assert_allclose(cpu_gauss_spline, gpu_gauss_spline, 1e-3)    
+
+    # Run multiple passes to get average
+    for _ in range(loops):
+        with prof.time_range("cupy_gauss_spline_loop", 2):
+            gpu_gauss_spline = gauss_spline(d_x, d_n)

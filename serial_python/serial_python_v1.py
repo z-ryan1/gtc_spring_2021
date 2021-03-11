@@ -24,7 +24,6 @@ if __name__ == "__main__":
 
     with prof.time_range("scipy_gauss_spline", 0):
         cpu_gauss_spline = signal.gauss_spline(x, n)
-        print(cpu_gauss_spline)
 
     # Run baseline with scipy.signal.gauss_spline
     for _ in range(100):
