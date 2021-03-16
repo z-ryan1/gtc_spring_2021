@@ -20,6 +20,7 @@ from scipy import signal
 from math import pi 
 from string import Template
 
+
 # CuPy: Version 1
 # Naive implementation of CuPy
 
@@ -34,29 +35,31 @@ extern "C" {
             float * __restrict__ res
             ) {
             
-        const int tx {
-            static_cast<int>( blockIdx.x * blockDim.x + threadIdx.x ) };
+        const int tx { static_cast<int>( blockIdx.x * blockDim.x + threadIdx.x ) };
         const int stride { static_cast<int>( blockDim.x * gridDim.x ) };
 
         const float  PI = 3.14159265358979f;
         for ( int tid = tx; tid < x_shape; tid += stride) {
             float x_val { x[tid] };
-            int signsq {};
+            float signsq {};
             float val {};
             float val2 {};
             float val3 {};
-            float var {};
+            float val4 {};
+            float res1 {};
 
             signsq = (n + 1) / 12.0;
-            val = 1 / sqrt( 2 * signsq * PI );
-            var = 2 / 2 / signsq;
-            val3 = exp( pow( -x_val, var ) ) ;
+            val = 2 * signsq * PI;
+            val2 = 2 / 2 / signsq;
+            val3 = pow(-x_val, val2 );
+            val4 = exp( val3 );
+            res1 = 1 / sqrt(val) * val4;
             res[tid] = (
-                val * val3
+                res1
             );
         }
     }
-}
+}su
 """
 )
 
@@ -67,7 +70,7 @@ def _gauss_spline(x, n, res):
     threadsperblock = (128, )
     blockspergrid = (numSM * 20,)
     
-    src = _cupy_gauss_spline_src.substitute(datatype=float)
+    src = _cupy_gauss_spline_src.substitute(datatype=np.float32)
     module = cp.RawModule(code=src, options=("-std=c++11",))
     kernel = module.get_function("_cupy_gauss_spline")
 
@@ -99,22 +102,19 @@ if __name__ == "__main__":
     x = [ 2 ** 16 ]
 
     in_samps = 2 ** 10
-    out_samps = 2 ** 20
 
-    np.random.seed(1234)
     n = np.random.randint(0, 1234)
     x = np.linspace(0.01, 10 * np.pi, in_samps)
 
     d_x = cp.array(x)
-    d_n = cp.array(n)
 
-    # Run baseline with scipy.signal.lombscargle
+    # Run baseline with scipy.signal.gauss_spling
     with prof.time_range("scipy_gauss_spline", 0):
         cpu_gauss_spline = signal.gauss_spline(x, n)
 
-    # Run Numba version
+    # Run CuPy version
     with prof.time_range("cupy_gauss_spline", 1):
-        gpu_gauss_spline = gauss_spline(d_x, d_n)
+        gpu_gauss_spline = gauss_spline(d_x, n)
         print(gpu_gauss_spline)
 
     # Copy result to host
@@ -126,4 +126,4 @@ if __name__ == "__main__":
     # Run multiple passes to get average
     for _ in range(loops):
         with prof.time_range("cupy_gauss_spline_loop", 2):
-            gpu_gauss_spline = gauss_spline(d_x, d_n)
+            gpu_gauss_spline = gauss_spline(d_x, n)
