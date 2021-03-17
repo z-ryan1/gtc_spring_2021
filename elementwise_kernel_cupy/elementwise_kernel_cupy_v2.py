@@ -13,7 +13,8 @@ _gauss_spline_kernel = cp.ElementwiseKernel(
     "T x, int32 n",
     "T output",
     """
-    output = 1 / sqrt( 2.0 * M_PI * signsq ) * exp( -( x * x ) * r_signsq );
+    output = 1 / sqrt( 2.0 * M_PI * signsq ) \
+        * exp( -( x * x ) * r_signsq );
     """,
     "_gauss_spline_kernel",
     options=("-std=c++11",),
@@ -35,8 +36,8 @@ if __name__ == "__main__":
     in_samps = 2 ** 10
 
     n = np.random.randint(0, 1234)
-
     x = np.linspace(0.01, 10 * np.pi, in_samps)
+    
     d_x = cp.array(x)
 
     # Run baseline with scipy.signal.gauss_spline
@@ -47,7 +48,7 @@ if __name__ == "__main__":
     with prof.time_range("cupy_gauss_spline", 1):
         gpu_gauss_spline = gauss_spline(d_x, n)
         print(gpu_gauss_spline)
-
+        
     # Copy result to host
     gpu_gauss_spline = cp.asnumpy(cpu_gauss_spline)
 

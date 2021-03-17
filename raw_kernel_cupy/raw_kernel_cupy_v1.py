@@ -20,10 +20,8 @@ from scipy import signal
 from math import pi 
 from string import Template
 
-
 # CuPy: Version 1
 # Naive implementation of CuPy
-
 
 _cupy_gauss_spline_src = Template(
     """
@@ -55,7 +53,7 @@ extern "C" {
             val4 = exp( val3 );
             res1 = 1 / sqrt(val) * val4;
             res[tid] = (
-                res1
+                1
             );
         }
     }

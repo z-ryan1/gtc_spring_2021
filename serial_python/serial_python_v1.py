@@ -16,9 +16,9 @@ if __name__ == "__main__":
     x = np.linspace(0.01, 10 * np.pi, in_samps)
 
     with prof.time_range("scipy_gauss_spline", 0):
-        cpu_gauss_spline = signal.gauss_spline(x, 1)
+        cpu_gauss_spline = signal.gauss_spline(x, n)
 
     # Run baseline with scipy.signal.gauss_spline
     for _ in range(100):
         with prof.time_range("scipy_gauss_spline_loop", 0):
-            cpu_gauss_spline = signal.gauss_spline(x, 1)
+            cpu_gauss_spline = signal.gauss_spline(x, n)

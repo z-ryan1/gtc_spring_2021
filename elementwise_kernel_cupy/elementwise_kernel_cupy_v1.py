@@ -13,7 +13,8 @@ _gauss_spline_kernel = cp.ElementwiseKernel(
     "T x, float64 pi, float64 signsq, float64 r_siqnsq",
     "T output",
     """
-    output = 1 / sqrt( 2 * pi * signsq ) * exp( -( x * x ) * r_siqnsq );
+    output = 1 / sqrt( 2 * pi * signsq )\
+         * exp( -( x * x ) * r_siqnsq );
     """,
     "_gauss_spline_kernel",
 )
@@ -36,8 +37,8 @@ if __name__ == "__main__":
     in_samps = 2 ** 10
 
     n = np.random.randint(0, 1234)
-
     x = np.linspace(0.01, 10 * np.pi, in_samps)
+    
     d_x = cp.array(x)
 
     # Run baseline with scipy.signal.gauss_spline
