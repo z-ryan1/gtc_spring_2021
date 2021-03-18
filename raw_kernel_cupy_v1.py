@@ -23,14 +23,16 @@ extern "C" {
         const int tx { static_cast<int>( blockIdx.x * blockDim.x + threadIdx.x ) };
         const int stride { static_cast<int>( blockDim.x * gridDim.x ) };
 
-        const double PI = 3.14159265358979f;
+        const double PI = 3.14159265358979;
         for ( int tid = tx; tid < x_shape; tid += stride) {
             double x_val { x[tid] };
             double signsq {};
+            double r_signsq {};
             double res1 {};
             
-            signsq = (1.0 + n) / 12.0;
-            res1 = (1.0 / sqrt(2.0 * PI * signsq)) * exp(pow(-x_val, (2 / 2 / signsq)));
+            signsq = ( 1.0 + n ) / 12.0;
+            r_signsq = 0.5 / signsq;
+            res1 = ( 1.0 / sqrt( 2.0 * PI * signsq )) * exp( -( x_val * x_val ) * r_signsq);
             res[tid] = (
                 res1
             );
@@ -78,7 +80,7 @@ if __name__ == "__main__":
     loops = int(sys.argv[1])
 
     x = [ 2 ** 16 ]
-    
+
     in_samps = 2 ** 10
 
     n = np.random.randint(0, 1234)
