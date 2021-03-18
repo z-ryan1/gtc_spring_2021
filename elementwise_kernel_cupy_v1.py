@@ -6,7 +6,7 @@ from cupy import prof
 from scipy import signal
 from string import Template
 
-# CuPy: Version 3
+# CuPy: Version 1
 # Elementwise kernel implementation of CuPy
 
 _gauss_spline_kernel = cp.ElementwiseKernel(

@@ -1,16 +1,3 @@
-# Copyright (c) 2019-2020, NVIDIA CORPORATION.
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import cupy as cp
 import numpy as np
 import sys
@@ -40,22 +27,15 @@ extern "C" {
         for ( int tid = tx; tid < x_shape; tid += stride) {
             double x_val { x[tid] };
             double signsq {};
-            double val {};
-            double val2 {};
-            double val3 {};
-            double val4 {};
             double res1 {};
             
             signsq = (1.0 + n) / 12.0;
-            val = 2 * signsq * PI;
-            val2 = 2.0 / 2.0 / signsq;
-            val3 = pow(-x_val, val2 );
-            val4 = exp( val3 );
-            res1 = 1.0 / sqrt(val) * val4;
+            res1 = (1.0 / sqrt(2.0 * PI * signsq)) * exp(pow(-x_val, (2 / 2 / signsq)));
             res[tid] = (
-                1
+                res1
             );
         }
+
     }
 }
 """
@@ -68,7 +48,7 @@ def _gauss_spline(x, n, res):
     threadsperblock = (128, )
     blockspergrid = (numSM * 20,)
     
-    src = _cupy_gauss_spline_src.substitute(datatype=float)
+    src = _cupy_gauss_spline_src.substitute(datatype="double")
     module = cp.RawModule(code=src, options=("-std=c++11",))
     kernel = module.get_function("_cupy_gauss_spline")
 
@@ -87,7 +67,7 @@ def gauss_spline(
     x,
     n,
 ):
-    res = cp.empty(x.shape[0], dtype=x.dtype)
+    res = cp.empty(x.shape[0], dtype="double")
     _gauss_spline(x, n, res)
 
     return res
@@ -97,15 +77,12 @@ if __name__ == "__main__":
 
     loops = int(sys.argv[1])
 
-    #x = [ 2 ** 16 ]
-    x = [ 0, 1, 1]
-    n = 1
+    x = [ 2 ** 16 ]
+    
     in_samps = 2 ** 10
 
-    #n = np.random.randint(0, 1234)
-    #x = np.linspace(0.01, 10 * np.pi, in_samps)
-
-    
+    n = np.random.randint(0, 1234)
+    x = np.linspace(0.01, 10 * np.pi, in_samps)
 
     # Run baseline with scipy.signal.gauss_spline
     with prof.time_range("scipy_gauss_spline", 0):
