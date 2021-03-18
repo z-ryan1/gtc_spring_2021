@@ -10,7 +10,7 @@ do
 	echo -e "**************************************************"
 	echo -e "Test serial_python_v${n}.py ${LOOPS}"
 	echo -e "**************************************************"
-	nsys profile --sample=none --trace=cuda,nvtx --stats=true python3 serial_python/serial_python_v${n}.py ${LOOPS}
+	nsys profile --sample=none --trace=cuda,nvtx --stats=true python3 serial_python_v${n}.py ${LOOPS}
 	echo -e
 done
 
@@ -20,7 +20,7 @@ do
 	echo -e "**************************************************"
 	echo -e "Test raw_kernel_cupy_v${n}.py ${LOOPS}"
 	echo -e "**************************************************"
-	nsys profile --sample=none --trace=cuda,nvtx --stats=true python3 raw_kernel_cupy/raw_kernel_cupy_v${n}.py ${LOOPS}
+	nsys profile --sample=none --trace=cuda,nvtx --stats=true python3 raw_kernel_cupy_v${n}.py ${LOOPS}
 	echo -e
 done
 
@@ -30,7 +30,7 @@ do
 	echo -e "**************************************************"
 	echo -e "Test elementwise_kernel_cupy_v${n}.py ${LOOPS}"
 	echo -e "**************************************************"
-	nsys profile --sample=none --trace=cuda,nvtx --stats=true python3 elementwise_kernel_cupy/elementwise_kernel_cupy_v${n}.py ${LOOPS}
+	nsys profile --sample=none --trace=cuda,nvtx --stats=true python3 elementwise_kernel_cupy_v${n}.py ${LOOPS}
 	echo -e
 done
 

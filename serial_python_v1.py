@@ -7,8 +7,7 @@ from scipy import signal
 # Python: Version 1
 # Naive serial implementation of Python
 
-if __name__ == "__main__":
-    
+def main():
     x = [ 2 ** 16 ]
     in_samps = 2 ** 10
 
@@ -22,3 +21,7 @@ if __name__ == "__main__":
     for _ in range(100):
         with prof.time_range("scipy_gauss_spline_loop", 0):
             cpu_gauss_spline = signal.gauss_spline(x, n)
+
+if __name__ == "__main__":
+    main()
+    
