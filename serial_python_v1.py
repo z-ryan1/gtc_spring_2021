@@ -8,17 +8,21 @@ from scipy import signal
 # Naive serial implementation of Python
 
 def main():
+
+    loops = int(sys.argv[1])
+
     x = [ 2 ** 16 ]
     in_samps = 2 ** 10
 
-    n = np.random.randint(0, 1234)
+    #n = np.random.randint(0, 1234)
+    n = 1
     x = np.linspace(0.01, 10 * np.pi, in_samps)
 
     with prof.time_range("scipy_gauss_spline", 0):
         cpu_gauss_spline = signal.gauss_spline(x, n)
 
     # Run baseline with scipy.signal.gauss_spline
-    for _ in range(100):
+    for _ in range(loops):
         with prof.time_range("scipy_gauss_spline_loop", 0):
             cpu_gauss_spline = signal.gauss_spline(x, n)
 

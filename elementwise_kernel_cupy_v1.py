@@ -26,8 +26,7 @@ _gauss_spline_kernel = cp.ElementwiseKernel(
 def gauss_spline(x, n):
     return _gauss_spline_kernel(x, n)
 
-if __name__ == "__main__":
-
+def main():
     loops = int(sys.argv[1])
 
     x = [ 2 ** 16 ]
@@ -55,3 +54,8 @@ if __name__ == "__main__":
     for _ in range(loops):
         with prof.time_range("cupy_gauss_spline_loop", 2):
             gpu_gauss_spline = gauss_spline(d_x, n)
+
+
+if __name__ == "__main__":
+    main()
+    
