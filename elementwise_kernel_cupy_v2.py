@@ -3,17 +3,17 @@ import numpy as np
 import sys
 
 from cupy import prof
-from scipy import signal
-from string import Template
+# from scipy import signal
+# from string import Template
 
 # CuPy: Version 3
 # Elementwise kernel for multiple CuPy calls
 
 _signal_kernel = cp.ElementwiseKernel(
     "T signal",
-    "T amp, T phase, T real, T imag",
+    "float64 amp, float64 phase, float64 real, float64 imag",
     """
-    amp = sqrt(signal.real() * conj(signal));
+    amp = sqrt((signal * conj(signal)).real());
     phase = arg(signal);
     real = signal.real();
     imag = signal.imag();
@@ -22,36 +22,48 @@ _signal_kernel = cp.ElementwiseKernel(
     options=("-std=c++11",),
 )
 
+
 def signal(x):
     return _signal_kernel(x)
 
+
 def cupy_signal(signal):
-    amp = cp.asnumpy(cp.sqrt(cp.real(signal * cp.conj(signal))))
-    phase = cp.asnumpy(cp.angle(signal))
-    real = cp.asnumpy(cp.real(signal))
-    imag = cp.asnumpy(cp.imag(signal))
+    amp = cp.sqrt(cp.real(signal * cp.conj(signal)))
+    phase = cp.angle(signal)
+    real = cp.real(signal)
+    imag = cp.imag(signal)
     return amp, phase, real, imag
+
 
 if __name__ == "__main__":
 
-    #loops = int(sys.argv[1])
+    loops = int(sys.argv[1])
 
-    num_samps = (2 ** 16)
+    num_samps = 2 ** 16
 
     cpu_sig = np.random.rand(num_samps) + 1.0j * np.random.rand(num_samps)
     gpu_sig = cp.array(cpu_sig)
 
     # Run baseline with signal.seperate
-    with prof.time_range("Signal seperate", 0):
-        amp, phase, real, imag = cupy_signal(gpu_sig)
-        #test = cupy_signal(gpu_sig)
-        #print(test)
+    # with prof.time_range("Signal seperate", 0):
+    amp, phase, real, imag = cupy_signal(gpu_sig)
 
-    # # Run EWK version
+    # # # Run EWK version
     # with prof.time_range("EWK signal", 1):
-    #     #amp_EWK, phase_EWK, real_EWK, imag_EWK = signal(gpu_sig)
-    #     test2 = signal(gpu_sig)
-    #     print(test2)
-       
+    amp_EWK, phase_EWK, real_EWK, imag_EWK = signal(gpu_sig)
+
     # Compare results
-    #np.testing.assert_allclose(test[0], test2[0] , 1e-3)    
+    cp.testing.assert_allclose(amp, amp_EWK, 1e-3)
+    cp.testing.assert_allclose(phase, phase_EWK, 1e-3)
+    cp.testing.assert_allclose(real, real_EWK, 1e-3)
+    cp.testing.assert_allclose(imag, imag_EWK, 1e-3)
+
+    # Run multiple passes to get average
+    for _ in range(loops):
+        with prof.time_range("cupy_signal_avg", 2):
+            amp, phase, real, imag = cupy_signal(gpu_sig)
+
+    # Run multiple passes to get average
+    for _ in range(loops):
+        with prof.time_range("ewk_signal_avg", 3):
+            amp_EWK, phase_EWK, real_EWK, imag_EWK = signal(gpu_sig)
