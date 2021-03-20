@@ -17,7 +17,7 @@ extern "C" {
             const int n,
             double * __restrict__ res
             ) {
-            
+
         const int tx { static_cast<int>( blockIdx.x * blockDim.x + threadIdx.x ) };
         const int stride { static_cast<int>( blockDim.x * gridDim.x ) };
 
@@ -27,7 +27,7 @@ extern "C" {
             double signsq {};
             double r_signsq {};
             double res1 {};
-            
+
             signsq = ( 1.0 + n ) / 12.0;
             r_signsq = 0.5 / signsq;
             res1 = ( 1.0 / sqrt( 2.0 * PI * signsq )) * exp( -( x_val * x_val ) * r_signsq);

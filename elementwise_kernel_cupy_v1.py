@@ -4,7 +4,6 @@ import sys
 
 from cupy import prof
 from scipy import signal
-from string import Template
 
 # Elementwise kernel implementation of CuPy
 
