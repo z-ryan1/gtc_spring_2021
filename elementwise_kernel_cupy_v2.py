@@ -3,10 +3,7 @@ import numpy as np
 import sys
 
 from cupy import prof
-# from scipy import signal
-# from string import Template
 
-# CuPy: Version 3
 # Elementwise kernel for multiple CuPy calls
 
 _signal_kernel = cp.ElementwiseKernel(
@@ -40,8 +37,8 @@ def main():
     cpu_sig = np.random.rand(num_samps) + 1.0j * np.random.rand(num_samps)
     gpu_sig = cp.array(cpu_sig)
 
-    # Run baseline with signal.seperate
-    with prof.time_range("Signal seperate", 0):
+    # Run baseline with cupy_signal
+    with prof.time_range("CuPy signal", 0):
         amp, phase, real, imag = cupy_signal(gpu_sig)
 
     # Run EWK version

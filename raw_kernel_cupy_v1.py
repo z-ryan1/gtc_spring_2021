@@ -4,11 +4,9 @@ import sys
 
 from cupy import prof
 from scipy import signal
-from math import pi 
 from string import Template
 
-# CuPy: Version 1
-# Naive implementation of CuPy
+# Raw kernel implementation of CuPy
 
 _cupy_gauss_spline_src = Template(
     """
@@ -74,25 +72,29 @@ def gauss_spline(
 
     return res
 
+def rand_data_gen_gpu(num_samps, dim=1, dtype=np.float64):
+    inp = tuple(np.ones(dim, dtype=int) * num_samps)
+    cpu_sig = np.random.random(inp)
+    cpu_sig = cpu_sig.astype(dtype)
+    gpu_sig = cp.asarray(cpu_sig)
+
+    return cpu_sig, gpu_sig
+
 def main():
     loops = int(sys.argv[1])
 
-    x = [ 2 ** 16 ]
-
-    in_samps = 2 ** 10
-
     n = np.random.randint(0, 1234)
-    x = np.linspace(0.01, 10 * np.pi, in_samps)
+
+    num_samps =  2 ** 16 
+    x, y = rand_data_gen_gpu(num_samps)
 
     # Run baseline with scipy.signal.gauss_spline
     with prof.time_range("scipy_gauss_spline", 0):
         cpu_gauss_spline = signal.gauss_spline(x, n)
 
-    d_x = cp.array(x)
-
     # Run CuPy version
     with prof.time_range("cupy_gauss_spline", 1):
-        gpu_gauss_spline = gauss_spline(d_x, n)
+        gpu_gauss_spline = gauss_spline(y, n)
 
     # Compare results
     np.testing.assert_allclose(cpu_gauss_spline, cp.asnumpy(gpu_gauss_spline), 1e-3)    
@@ -100,7 +102,7 @@ def main():
     # Run multiple passes to get average
     for _ in range(loops):
         with prof.time_range("cupy_gauss_spline_loop", 2):
-            gpu_gauss_spline = gauss_spline(d_x, n)
+            gpu_gauss_spline = gauss_spline(y, n)
 
 if __name__ == "__main__":
     main()

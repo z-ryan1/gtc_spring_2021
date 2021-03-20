@@ -4,24 +4,29 @@ import cupy as cp
 from cupy import prof
 from scipy import signal
 
-# Python: Version 1
 # Naive serial implementation of Python
+
+def rand_data_gen(num_samps, dim=1, dtype=np.float64):
+    inp = tuple(np.ones(dim, dtype=int) * num_samps)
+    cpu_sig = np.random.random(inp)
+    cpu_sig = cpu_sig.astype(dtype)
+
+    return cpu_sig
 
 def main():
 
     loops = int(sys.argv[1])
 
-    x = [ 2 ** 16 ]
-    in_samps = 2 ** 10
+    n = np.random.randint(0, 1234)
 
-    #n = np.random.randint(0, 1234)
-    n = 1
-    x = np.linspace(0.01, 10 * np.pi, in_samps)
+    num_samps =  2 ** 16 
+    x = rand_data_gen(num_samps)
 
+    # Run baseline with scipy.signal.gauss_spline
     with prof.time_range("scipy_gauss_spline", 0):
         cpu_gauss_spline = signal.gauss_spline(x, n)
 
-    # Run baseline with scipy.signal.gauss_spline
+    # Run multiple passes to get average
     for _ in range(loops):
         with prof.time_range("scipy_gauss_spline_loop", 0):
             cpu_gauss_spline = signal.gauss_spline(x, n)
