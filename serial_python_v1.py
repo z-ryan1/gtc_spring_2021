@@ -1,10 +1,10 @@
 import numpy as np
 import sys
-import cupy as cp
 from cupy import prof
 from scipy import signal
 
 # Naive serial implementation of Python
+
 
 def rand_data_gen(num_samps, dim=1, dtype=np.float64):
     inp = tuple(np.ones(dim, dtype=int) * num_samps)
@@ -13,13 +13,14 @@ def rand_data_gen(num_samps, dim=1, dtype=np.float64):
 
     return cpu_sig
 
+
 def main():
 
     loops = int(sys.argv[1])
 
     n = np.random.randint(0, 1234)
 
-    num_samps =  2 ** 16 
+    num_samps = 2 ** 16
     x = rand_data_gen(num_samps)
 
     # Run baseline with scipy.signal.gauss_spline
@@ -31,6 +32,6 @@ def main():
         with prof.time_range("scipy_gauss_spline_loop", 0):
             cpu_gauss_spline = signal.gauss_spline(x, n)
 
+
 if __name__ == "__main__":
-    main()
-    
+    sys.exit(main())

@@ -21,8 +21,10 @@ _gauss_spline_kernel = cp.ElementwiseKernel(
                const double r_signsq { 0.5 / signsq };",
 )
 
+
 def gauss_spline(x, n):
     return _gauss_spline_kernel(x, n)
+
 
 def rand_data_gen_gpu(num_samps, dim=1, dtype=np.float64):
     inp = tuple(np.ones(dim, dtype=int) * num_samps)
@@ -32,14 +34,15 @@ def rand_data_gen_gpu(num_samps, dim=1, dtype=np.float64):
 
     return cpu_sig, gpu_sig
 
+
 def main():
     loops = int(sys.argv[1])
 
     n = np.random.randint(0, 1234)
 
-    num_samps =  2 ** 16 
+    num_samps = 2 ** 16
     x, y = rand_data_gen_gpu(num_samps)
-    
+
     # Run baseline with scipy.signal.gauss_spline
     with prof.time_range("scipy_gauss_spline", 0):
         cpu_gauss_spline = signal.gauss_spline(x, n)
@@ -47,9 +50,11 @@ def main():
     # Run CuPy version
     with prof.time_range("cupy_gauss_spline", 1):
         gpu_gauss_spline = gauss_spline(y, n)
-       
+
     # Compare results
-    np.testing.assert_allclose(cpu_gauss_spline, cp.asnumpy(gpu_gauss_spline), 1e-3)    
+    np.testing.assert_allclose(
+        cpu_gauss_spline, cp.asnumpy(gpu_gauss_spline), 1e-3
+    )
 
     # Run multiple passes to get average
     for _ in range(loops):
@@ -58,5 +63,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
-    
+    sys.exit(main())

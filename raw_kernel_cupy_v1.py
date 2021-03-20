@@ -41,23 +41,24 @@ extern "C" {
 """
 )
 
+
 def _gauss_spline(x, n, res):
 
     device_id = cp.cuda.Device()
     numSM = device_id.attributes["MultiProcessorCount"]
-    threadsperblock = (128, )
+    threadsperblock = (128,)
     blockspergrid = (numSM * 20,)
-    
+
     src = _cupy_gauss_spline_src.substitute(datatype="double")
     module = cp.RawModule(code=src, options=("-std=c++11",))
     kernel = module.get_function("_cupy_gauss_spline")
 
     kernel_args = (
-            x.shape[0],
-            x,
-            n,
-            res,
-        )
+        x.shape[0],
+        x,
+        n,
+        res,
+    )
 
     kernel(blockspergrid, threadsperblock, kernel_args)
     cp.cuda.runtime.deviceSynchronize()
@@ -72,6 +73,7 @@ def gauss_spline(
 
     return res
 
+
 def rand_data_gen_gpu(num_samps, dim=1, dtype=np.float64):
     inp = tuple(np.ones(dim, dtype=int) * num_samps)
     cpu_sig = np.random.random(inp)
@@ -80,12 +82,13 @@ def rand_data_gen_gpu(num_samps, dim=1, dtype=np.float64):
 
     return cpu_sig, gpu_sig
 
+
 def main():
     loops = int(sys.argv[1])
 
     n = np.random.randint(0, 1234)
 
-    num_samps =  2 ** 16 
+    num_samps = 2 ** 16
     x, y = rand_data_gen_gpu(num_samps)
 
     # Run baseline with scipy.signal.gauss_spline
@@ -97,13 +100,15 @@ def main():
         gpu_gauss_spline = gauss_spline(y, n)
 
     # Compare results
-    np.testing.assert_allclose(cpu_gauss_spline, cp.asnumpy(gpu_gauss_spline), 1e-3)    
+    np.testing.assert_allclose(
+        cpu_gauss_spline, cp.asnumpy(gpu_gauss_spline), 1e-3
+    )
 
     # Run multiple passes to get average
     for _ in range(loops):
         with prof.time_range("cupy_gauss_spline_loop", 2):
             gpu_gauss_spline = gauss_spline(y, n)
 
+
 if __name__ == "__main__":
-    main()
-    
+    sys.exit(main())

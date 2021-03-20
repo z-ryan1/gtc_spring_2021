@@ -19,8 +19,10 @@ _signal_kernel = cp.ElementwiseKernel(
     options=("-std=c++11",),
 )
 
+
 def signal(x):
     return _signal_kernel(x)
+
 
 def cupy_signal(signal):
     amp = cp.sqrt(cp.real(signal * cp.conj(signal)))
@@ -28,6 +30,7 @@ def cupy_signal(signal):
     real = cp.real(signal)
     imag = cp.imag(signal)
     return amp, phase, real, imag
+
 
 def main():
     loops = int(sys.argv[1])
@@ -61,6 +64,6 @@ def main():
         with prof.time_range("ewk_signal_avg", 3):
             amp_EWK, phase_EWK, real_EWK, imag_EWK = signal(gpu_sig)
 
+
 if __name__ == "__main__":
-    main()
-    
+    sys.exit(main())
