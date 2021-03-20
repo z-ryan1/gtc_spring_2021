@@ -21,16 +21,16 @@ def main():
     n = np.random.randint(0, 1234)
 
     num_samps = 2 ** 16
-    x = rand_data_gen(num_samps)
+    cpu_sig = rand_data_gen(num_samps)
 
     # Run baseline with scipy.signal.gauss_spline
     with prof.time_range("scipy_gauss_spline", 0):
-        cpu_gauss_spline = signal.gauss_spline(x, n)
+        cpu_gauss_spline = signal.gauss_spline(cpu_sig, n)
 
     # Run multiple passes to get average
     for _ in range(loops):
         with prof.time_range("scipy_gauss_spline_loop", 0):
-            cpu_gauss_spline = signal.gauss_spline(x, n)
+            cpu_gauss_spline = signal.gauss_spline(cpu_sig, n)
 
 
 if __name__ == "__main__":

@@ -20,7 +20,7 @@ _signal_kernel = cp.ElementwiseKernel(
 )
 
 
-def signal(x):
+def signal(sig):
     return _signal_kernel(x)
 
 
