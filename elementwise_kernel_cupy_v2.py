@@ -21,7 +21,7 @@ _signal_kernel = cp.ElementwiseKernel(
 
 
 def signal(sig):
-    return _signal_kernel(x)
+    return _signal_kernel(sig)
 
 
 def cupy_signal(signal):
