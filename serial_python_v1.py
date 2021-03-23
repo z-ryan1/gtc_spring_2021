@@ -32,6 +32,5 @@ def main():
         with prof.time_range("scipy_gauss_spline_loop", 0):
             cpu_gauss_spline = signal.gauss_spline(cpu_sig, n)
 
-
 if __name__ == "__main__":
     sys.exit(main())

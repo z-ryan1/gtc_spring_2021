@@ -49,7 +49,7 @@ def _gauss_spline(x, n, res):
     threadsperblock = (128,)
     blockspergrid = (numSM * 20,)
 
-    src = _cupy_gauss_spline_src.substitute(datatype="double")
+    src = _cupy_gauss_spline_src.substitute(dtype=np.float64)
     module = cp.RawModule(code=src, options=("-std=c++11",))
     kernel = module.get_function("_cupy_gauss_spline")
 
@@ -61,7 +61,6 @@ def _gauss_spline(x, n, res):
     )
 
     kernel(blockspergrid, threadsperblock, kernel_args)
-    cp.cuda.runtime.deviceSynchronize()
 
 
 def gauss_spline(
@@ -108,7 +107,7 @@ def main():
     for _ in range(loops):
         with prof.time_range("cupy_gauss_spline_loop", 2):
             gpu_gauss_spline = gauss_spline(gpu_sig, n)
-
+            cp.cuda.runtime.deviceSynchronize()
 
 if __name__ == "__main__":
     sys.exit(main())

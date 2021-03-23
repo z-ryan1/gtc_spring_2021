@@ -1,9 +1,11 @@
 #!/bin/bash
 declare LOOPS=$1
 
-if [ -z "$var" ]
+if [ -z "$LOOPS" ];
 then
 	LOOPS=10
+else
+	LOOPS=${LOOPS}
 fi
 
 #Test Scipy

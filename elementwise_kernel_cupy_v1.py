@@ -59,7 +59,7 @@ def main():
     for _ in range(loops):
         with prof.time_range("cupy_gauss_spline_loop", 2):
             gpu_gauss_spline = gauss_spline(gpu_sig, n)
-
+            cp.cuda.runtime.deviceSynchronize()
 
 if __name__ == "__main__":
     sys.exit(main())

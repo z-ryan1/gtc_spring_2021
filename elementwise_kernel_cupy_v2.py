@@ -29,6 +29,7 @@ def cupy_signal(signal):
     phase = cp.angle(signal)
     real = cp.real(signal)
     imag = cp.imag(signal)
+
     return amp, phase, real, imag
 
 
@@ -58,12 +59,14 @@ def main():
     for _ in range(loops):
         with prof.time_range("cupy_signal_avg", 2):
             amp, phase, real, imag = cupy_signal(gpu_sig)
+            cp.cuda.runtime.deviceSynchronize()
+
 
     # Run multiple passes to get average
     for _ in range(loops):
         with prof.time_range("ewk_signal_avg", 3):
             amp_EWK, phase_EWK, real_EWK, imag_EWK = signal(gpu_sig)
-
+            cp.cuda.runtime.deviceSynchronize()
 
 if __name__ == "__main__":
     sys.exit(main())
